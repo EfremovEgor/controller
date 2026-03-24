@@ -13,12 +13,14 @@ set(project_sources
     ${PROJECT_SOURCE_DIR}/src/main.cpp
     ${PROJECT_SOURCE_DIR}/src/logger/logger.cpp
     ${PROJECT_SOURCE_DIR}/src/server/server.cpp
+    ${PROJECT_SOURCE_DIR}/src/arduino_connector/arduino_connector.cpp
 )
 
 set(project_headers
     ${PROJECT_SOURCE_DIR}/src/logger/logger.hpp
     ${PROJECT_SOURCE_DIR}/src/server/server.hpp
     ${PROJECT_SOURCE_DIR}/src/server/resolvers.hpp
+    ${PROJECT_SOURCE_DIR}/src/arduino_connector/arduino_connector.hpp
 )
 add_executable(
     ${PROJECT_NAME}
