@@ -12,6 +12,7 @@ ArduinoConnector *ArduinoConnector::instance = nullptr;
 ArduinoConnector::ArduinoConnector()
 {
     instance = this;
+    sound_player = std::make_unique<SoundPlayer>();
     serialFd = setupSerial(SERIAL_PORT, baudRate);
     if (serialFd < 0)
     {
@@ -25,14 +26,37 @@ ArduinoConnector::ArduinoConnector()
 
         signal(SIGINT, signalHandler);  // Ctrl+C
         signal(SIGTERM, signalHandler); // kill
+        reader_thread = std::thread(&ArduinoConnector::readerLoop, this);
+        syslog(LOG_INFO, "Поток readerLoop запущен (ID: %ld)", reader_thread.get_id());
     }
 }
 
 ArduinoConnector::~ArduinoConnector()
 {
+
+    keepRunning = false;
+
+    if (reader_thread.joinable())
+    {
+        syslog(LOG_INFO, "Ожидание завершения readerLoop...");
+        reader_thread.join();
+        syslog(LOG_INFO, "readerLoop завершён");
+    }
+
+    if (sound_player)
+    {
+        sound_player->stop();
+    }
+
+    if (serialFd >= 0)
+    {
+        close(serialFd);
+        serialFd = -1;
+    }
     instance = nullptr;
-    close(serialFd);
+
     syslog(LOG_INFO, "Демон остановлен");
+
     closelog();
 }
 
@@ -103,18 +127,22 @@ bool ArduinoConnector::sendCommand(std::string cmd)
 
 void ArduinoConnector::readerLoop()
 {
+    syslog(LOG_INFO, "readerLoop запущен в потоке %ld", pthread_self());
+
     std::string buffer;
     char ch;
 
     while (keepRunning && serialFd >= 0)
     {
         ssize_t n = read(serialFd, &ch, 1);
+
         if (n > 0)
         {
             if (ch == '\n' || ch == '\r')
             {
                 if (!buffer.empty())
                 {
+                    syslog(LOG_DEBUG, "Получена команда: %s", buffer.c_str());
                     onArduinoResponse(buffer);
                     buffer.clear();
                 }
@@ -124,11 +152,18 @@ void ArduinoConnector::readerLoop()
                 buffer += ch;
             }
         }
-        else
+        else if (n < 0)
         {
             usleep(10000);
         }
+        else
+        {
+            syslog(LOG_WARNING, "Соединение с UART разорвано");
+            break;
+        }
     }
+
+    syslog(LOG_INFO, "readerLoop завершён (поток %ld)", pthread_self());
 }
 
 void ArduinoConnector::onArduinoResponse(const std::string &response)
@@ -139,9 +174,8 @@ void ArduinoConnector::onArduinoResponse(const std::string &response)
 
     if (response == "7")
     {
-        int ret = system("./venv/bin/python3 sound.py stop.mp3 &");
-        if (ret == 0)
-            syslog(LOG_INFO, "Звук объезда воспроизведён");
+        sound_player->play("stop.mp3");
+        syslog(LOG_INFO, "Звук объезда воспроизведён");
     }
 }
 
