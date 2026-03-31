@@ -1,10 +1,15 @@
 #pragma once
 #include "../server/resolvers.hpp"
 #include "../server/server.hpp"
+#include "sound_player.hpp"
+#include <thread>
 
 class ArduinoConnector
 {
 private:
+    std::thread reader_thread;
+    std::unique_ptr<SoundPlayer> sound_player;
+
     static ArduinoConnector *instance;
 
     const char *SERIAL_PORT = "/dev/ttyUSB0";
