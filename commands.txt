@@ -1,9 +1,16 @@
-r2d2:forward
-r2d2:backward
-r2d2:left
-r2d2:right
-r2d2:chaos
-r2d2:greeting
-r2d2:move_head
-r2d2:
-r2d2:
+r2d2:forward            0x1#
+r2d2:backward           0x2#
+r2d2:left               0x3#
+r2d2:right              0x4#
+r2d2:stop               0x50
+r2d2:chaos              0x70
+r2d2:greeting           0x80
+r2d2:move_head          0x90
+
+Ответы
+r2d2:ok                 0x00
+r2d2:error              0xFF
+r2d2:status_idle        0xE0
+r2d2:status_obstacle    0xE1
+r2d2:status_moving      0xE2
+
