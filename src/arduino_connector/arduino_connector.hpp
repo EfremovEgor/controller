@@ -1,8 +1,9 @@
 #pragma once
 #include "../server/resolvers.hpp"
 #include "../server/server.hpp"
-#include "sound_player.hpp"
+#include "../soundpad/sound_player.hpp"
 #include <thread>
+#include <vector>
 
 class ArduinoConnector
 {
@@ -14,7 +15,7 @@ private:
 
     const char *SERIAL_PORT = "/dev/ttyUSB0";
     bool keepRunning = true;
-    int baudRate = B9600;
+    int baudRate = 9600;
     int serialFd;
 
     char buffer[256];
@@ -26,7 +27,7 @@ private:
     static void signalHandler(int sig);
     bool sendCommand(std::string cmd);
     void readerLoop();
-    void ArduinoConnector::onArduinoResponse(const std::string &response);
+    void onArduinoResponse(const std::string &response);
     int getArg(const std::vector<std::string> &args, size_t index) const;
 
 public:

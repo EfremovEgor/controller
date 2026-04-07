@@ -27,7 +27,7 @@ ArduinoConnector::ArduinoConnector()
         signal(SIGINT, signalHandler);  // Ctrl+C
         signal(SIGTERM, signalHandler); // kill
         reader_thread = std::thread(&ArduinoConnector::readerLoop, this);
-        syslog(LOG_INFO, "Поток readerLoop запущен (ID: %ld)", reader_thread.get_id());
+        syslog(LOG_INFO, "Поток readerLoop запущен");
     }
 }
 
@@ -117,9 +117,21 @@ bool ArduinoConnector::sendCommand(std::string cmd)
         cmd += '\n';
     }
 
-    ssize_t sent = write(serialFd, &cmd, cmd.size());
-    tcdrain(serialFd);
+    const char *data = cmd.c_str();
+    size_t totalSent = 0;
+    size_t len = cmd.size();
 
+    while (totalSent < len)
+    {
+        ssize_t sent = write(serialFd, data + totalSent, len - totalSent);
+        if (sent < 0)
+        {
+            return false;
+        }
+        totalSent += sent;
+    }
+
+    tcdrain(serialFd);
     return true;
 }
 
