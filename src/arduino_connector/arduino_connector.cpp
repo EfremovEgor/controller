@@ -91,10 +91,6 @@ int ArduinoConnector::setupSerial(const char *port, int baud)
     return fd;
 }
 
-void ArduinoConnector::greeting()
-{
-}
-
 void ArduinoConnector::signalHandler(int sig)
 {
     if (instance)
@@ -104,7 +100,7 @@ void ArduinoConnector::signalHandler(int sig)
     }
 }
 
-bool ArduinoConnector::sendCommand(std::string cmd)
+bool ArduinoConnector::sendCommand(const char &cmd)
 {
     if (serialFd < 0)
     {
@@ -112,115 +108,118 @@ bool ArduinoConnector::sendCommand(std::string cmd)
         return false;
     }
 
-    if (!cmd.empty() && cmd.back() != '\n')
+    ssize_t sent = write(serialFd, &cmd, 1);
+    if (sent < 0)
     {
-        cmd += '\n';
-    }
-
-    const char *data = cmd.c_str();
-    size_t totalSent = 0;
-    size_t len = cmd.size();
-
-    while (totalSent < len)
-    {
-        ssize_t sent = write(serialFd, data + totalSent, len - totalSent);
-        if (sent < 0)
-        {
-            return false;
-        }
-        totalSent += sent;
+        return false;
     }
 
     tcdrain(serialFd);
     return true;
 }
 
-// Получение и воспроизведение сигналов от ардуино
-
 void ArduinoConnector::readerLoop()
 {
-    syslog(LOG_INFO, "readerLoop запущен в потоке %ld", pthread_self());
-
-    std::string buffer;
-    char ch;
+    syslog(LOG_INFO, "Binary readerLoop started");
+    uint8_t byte;
 
     while (keepRunning && serialFd >= 0)
     {
-        ssize_t n = read(serialFd, &ch, 1);
+        ssize_t n = read(serialFd, &byte, 1);
 
         if (n > 0)
         {
-            if (ch == '\n' || ch == '\r')
-            {
-                if (!buffer.empty())
-                {
-                    syslog(LOG_DEBUG, "Получена команда: %s", buffer.c_str());
-                    onArduinoResponse(buffer);
-                    buffer.clear();
-                }
-            }
-            else
-            {
-                buffer += ch;
-            }
+            onArduinoByteResponse(byte);
         }
         else if (n < 0)
         {
-            usleep(10000);
+            usleep(1000);
         }
         else
         {
-            syslog(LOG_WARNING, "Соединение с UART разорвано");
+            syslog(LOG_WARNING, "UART disconnected");
             break;
         }
     }
-
-    syslog(LOG_INFO, "readerLoop завершён (поток %ld)", pthread_self());
+    syslog(LOG_INFO, "Binary readerLoop stopped");
 }
 
-void ArduinoConnector::onArduinoResponse(const std::string &response)
+void ArduinoConnector::onArduinoByteResponse(uint8_t byte)
 {
-    syslog(LOG_INFO, "Arduino: %s", response.c_str());
-    std::cout << "Arduino: " << response << std::endl;
+    std::cout << "Byte: " << (int)byte << std::endl;
     std::cout.flush();
 
-    if (response == "7")
+    syslog(LOG_DEBUG, "Received byte: %d", byte);
+
+    switch (byte)
     {
-        sound_player->play("stop.mp3");
-        syslog(LOG_INFO, "Звук объезда воспроизведён");
+    case 0:
+        // syslog(LOG_INFO, "Command OK");
+        break;
+
+    case 255:
+        syslog(LOG_ERR, "Command Error from Arduino");
+        break;
+    case 0xE0:
+        syslog(LOG_WARNING, "Obsracle");
+        if (sound_player)
+        {
+            sound_player->play("stop.mp3"); // <- Указать абсолютный путь к файлу
+        }
+        break;
+    default:
+        break;
     }
 }
 
 // Конкретные комманды
 
-void ArduinoConnector::forward(const std::string &speed)
+void ArduinoConnector::forward(const char &speed)
 {
-    sendCommand("f" + speed);
+    char res = 0b00010000 | (speed & 0x0F);
+    sendCommand(res);
 }
 
-void ArduinoConnector::backward(const std::string &speed)
+void ArduinoConnector::backward(const char &speed)
 {
-    sendCommand("b" + speed);
+    char res = 0b00100000 | (speed & 0x0F);
+    sendCommand(res);
 }
 
-void ArduinoConnector::left(const std::string &speed)
+void ArduinoConnector::left(const char &speed)
 {
-    sendCommand("l" + speed);
+    char res = 0b00110000 | (speed & 0x0F);
+    sendCommand(res);
 }
 
-void ArduinoConnector::right(const std::string &speed)
+void ArduinoConnector::right(const char &speed)
 {
-    sendCommand("r" + speed);
+    char res = 0b01000000 | (speed & 0x0F);
+    sendCommand(res);
 }
 
-void ArduinoConnector::move_head()
+void ArduinoConnector::stop()
 {
-    sendCommand("move_head");
+    char res = 0b01010000;
+    sendCommand(res);
 }
 
 void ArduinoConnector::chaos()
 {
-    sendCommand("chaos");
+    char res = 0b01110000;
+    sendCommand(res);
+}
+
+void ArduinoConnector::greeting()
+{
+    char res = 0b10000000;
+    sendCommand(res);
+}
+
+void ArduinoConnector::move_head()
+{
+    char res = 0b10010000;
+    sendCommand(res);
 }
 
 int ArduinoConnector::getArg(const std::vector<std::string> &args, size_t index) const
