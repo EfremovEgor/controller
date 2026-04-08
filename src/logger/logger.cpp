@@ -38,10 +38,7 @@ void BaseLogger::setOutput(const LoggerOutput &output)
     this->output = output;
 }
 
-BaseLogger::BaseLogger(LogLevel level)
-{
-    this->level = level;
-}
+BaseLogger::BaseLogger(LogLevel level) : level(level) {}
 
 void BaseLogger::setName(const std::string &name)
 {

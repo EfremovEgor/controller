@@ -57,11 +57,11 @@ inline const LoggerFormatter baseFormatterCallback = [](const std::string &messa
 class BaseLogger
 {
 public:
-    void log(const std::string &message, LogLevel level = LogLevel::INFO);
-    void debug(const std::string &message);
-    void info(const std::string &message);
-    void warning(const std::string &message);
-    void error(const std::string &message);
+    virtual void log(const std::string &message, LogLevel level = LogLevel::INFO);
+    virtual void debug(const std::string &message);
+    virtual void info(const std::string &message);
+    virtual void warning(const std::string &message);
+    virtual void error(const std::string &message);
 
     void setFormatter(const LoggerFormatter &formatter);
     void setOutput(const LoggerOutput &output);
@@ -73,4 +73,16 @@ private:
     LoggerOutput output = consoleOutputCallback;
     std::string name = "Logger";
     LogLevel level = LogLevel::INFO;
+};
+
+class NullLogger : public BaseLogger
+{
+public:
+    NullLogger() : BaseLogger(LogLevel::DEBUG) {}
+
+    inline void log(const std::string &message, LogLevel level = LogLevel::INFO) override {};
+    inline void info(const std::string &) override {}
+    inline void debug(const std::string &) override {}
+    inline void warning(const std::string &message) override {};
+    inline void error(const std::string &) override {}
 };

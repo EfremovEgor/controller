@@ -1,15 +1,24 @@
 #pragma once
+#include <thread>
+#include <vector>
+#include <iostream>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <signal.h>
+#include <syslog.h>
+
 #include "../server/resolvers.hpp"
 #include "../server/server.hpp"
 #include "../soundpad/sound_player.hpp"
-#include <thread>
-#include <vector>
+#include "../logger/logger.hpp"
 
 class ArduinoConnector
 {
 private:
     std::thread reader_thread;
     std::unique_ptr<SoundPlayer> sound_player;
+    std::unique_ptr<BaseLogger> logger;
 
     static ArduinoConnector *instance;
 
@@ -31,7 +40,7 @@ private:
 
 public:
     ~ArduinoConnector();
-    ArduinoConnector();
+    ArduinoConnector(std::unique_ptr<BaseLogger> logger);
     ServerResolver getResolver(Server &server)
     {
         CommandResolverMap mp{

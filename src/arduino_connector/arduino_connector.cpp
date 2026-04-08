@@ -1,33 +1,26 @@
-#include <iostream>
-#include <unistd.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <signal.h>
-#include <syslog.h>
-
 #include "arduino_connector.hpp"
 
 ArduinoConnector *ArduinoConnector::instance = nullptr;
 
-ArduinoConnector::ArduinoConnector()
+ArduinoConnector::ArduinoConnector(std::unique_ptr<BaseLogger> logger)
+    : logger(logger ? std::move(logger) : std::make_unique<NullLogger>())
 {
     instance = this;
     sound_player = std::make_unique<SoundPlayer>();
     serialFd = setupSerial(SERIAL_PORT, baudRate);
     if (serialFd < 0)
     {
-        syslog(LOG_ERR, "Ошибка инициализации UART");
-        closelog();
+        this->logger->error("Ошибка инициализации UART");
     }
     else
     {
         openlog("arduino_daemon", LOG_PID, LOG_DAEMON);
-        syslog(LOG_INFO, "Запуск демона управления Arduino");
+        this->logger->info("Запуск демона управления Arduino");
 
         signal(SIGINT, signalHandler);  // Ctrl+C
         signal(SIGTERM, signalHandler); // kill
         reader_thread = std::thread(&ArduinoConnector::readerLoop, this);
-        syslog(LOG_INFO, "Поток readerLoop запущен");
+        this->logger->info("Поток readerLoop запущен");
     }
 }
 

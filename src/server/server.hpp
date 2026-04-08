@@ -9,6 +9,7 @@
 #include <string_view>
 #include <map>
 #include <sys/socket.h>
+
 #include "../logger/logger.hpp"
 
 typedef char Buffer[2048];
@@ -32,7 +33,8 @@ private:
     ServerResolver resolver;
 
 public:
-    Server(std::unique_ptr<BaseLogger> logger, const std::string *host = nullptr, unsigned short *port = nullptr);
+    Server(std::unique_ptr<BaseLogger> logger, std::optional<std::string> host = std::nullopt,
+           std::optional<unsigned short> port = std::nullopt);
     ~Server();
     void sendTo(int sock, BufferView buffer);
     void setResolver(ServerResolver resolver);

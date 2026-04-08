@@ -9,12 +9,12 @@
 int main()
 {
     BaseLogger serverLogger = BaseLogger(LogLevel::DEBUG);
+    BaseLogger arduinoLogger = BaseLogger(LogLevel::DEBUG);
     serverLogger.setName("Server");
     std::string host = "0.0.0.0";
 
-    Server server = Server(std::make_unique<BaseLogger>(serverLogger), &host);
-
-    ArduinoConnector ac = ArduinoConnector();
+    Server server = Server(std::make_unique<BaseLogger>(serverLogger), host);
+    ArduinoConnector ac = ArduinoConnector(std::make_unique<BaseLogger>(arduinoLogger));
 
     server.setResolver(ac.getResolver(server));
     server.run();

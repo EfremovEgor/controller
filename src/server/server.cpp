@@ -27,10 +27,11 @@ void Server::init()
     listen(listener, 1);
 }
 
-Server::Server(std::unique_ptr<BaseLogger> logger, const std::string *host, unsigned short *port)
-    : logger(std::move(logger)),
-      host(host ? *host : "127.0.0.1"),
-      port(port ? *port : 8080),
+Server::Server(std::unique_ptr<BaseLogger> logger, std::optional<std::string> host,
+               std::optional<unsigned short> port)
+    : logger(logger ? std::move(logger) : std::make_unique<NullLogger>()),
+      host(host.value_or("127.0.0.1")),
+      port(port.value_or(8080)),
       resolver(echoResolver) {}
 
 Server::~Server()
