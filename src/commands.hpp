@@ -1,7 +1,9 @@
 #pragma once
+
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <format>
 
 class Command
 {
@@ -13,12 +15,10 @@ public:
     {
         return this->domain + ":" + this->command;
     }
-
     Command(std::string rawCommand)
     {
         size_t posColon = rawCommand.find(':');
         size_t posPipe = rawCommand.find('|');
-
         this->domain = (posColon != std::string::npos)
                            ? rawCommand.substr(0, posColon)
                            : rawCommand;
@@ -26,7 +26,6 @@ public:
         size_t startCmd = (posColon != std::string::npos) ? posColon + 1 : 0;
         size_t endCmd = (posPipe != std::string::npos) ? posPipe : rawCommand.length();
         this->command = rawCommand.substr(startCmd, endCmd - startCmd);
-        std::cout << this->command << std::endl;
 
         if (posPipe != std::string::npos)
         {
@@ -48,10 +47,20 @@ public:
             this->args.push_back(lastArg);
         }
     }
+    std::string toString() const
+    {
+        auto argsStr = std::accumulate(args.begin(), args.end(), std::string(""),
+                                       [](const std::string &a, const std::string &b)
+                                       {
+                                           return a.empty() ? b : a + ", " + b;
+                                       });
+
+        return std::format("Command: {}, Domain: {}, Basis: {}, Args: [{}]",
+                           command, domain, makeCommandBasis(), argsStr);
+    }
     friend std::ostream &operator<<(std::ostream &os, const Command &obj)
     {
-        return os << "Command: " << obj.command << ", Domain: " << obj.domain << ", Basis: " << obj.makeCommandBasis()
-                  << ", Args: " << std::accumulate(obj.args.begin(), obj.args.end(), std::string(""));
+        return os << obj.toString();
         ;
     }
 };

@@ -1,8 +1,10 @@
 #pragma once
+
 #include <string>
 #include <map>
 #include <functional>
 #include "server.hpp"
+
 #include "../commands.hpp"
 
 typedef std::map<std::string, std::function<void(int sock, BufferView buffer, Command command)>> CommandResolverMap;
@@ -17,7 +19,6 @@ inline ServerResolver getCommandResolver(CommandResolverMap mp)
 
         auto cmd = Command(key);
         const std::string basis = cmd.makeCommandBasis();
-        std::cout << cmd << std::endl;
 
         auto it = mp.find(basis);
         if (it == mp.end())

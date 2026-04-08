@@ -1,6 +1,10 @@
 #pragma once
 
 #include "miniaudio.h"
+#include "sound_player.hpp"
+#include <cstdio>
+#include <cstring>
+#include <syslog.h>
 #include <string>
 #include <mutex>
 

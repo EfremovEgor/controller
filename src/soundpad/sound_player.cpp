@@ -1,10 +1,6 @@
-// sound_player.cpp
-#define MA_IMPLEMENTATION
-#include "miniaudio.h"
 #include "sound_player.hpp"
-#include <cstdio>
-#include <cstring>
-#include <syslog.h>
+
+#define MA_IMPLEMENTATION
 
 SoundPlayer::SoundPlayer()
 {

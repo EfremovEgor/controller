@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <functional>
 #include <format>
@@ -8,6 +9,7 @@
 #include <utility>
 #include <arpa/inet.h>
 #include <format>
+
 enum LogLevel
 {
     DEBUG,

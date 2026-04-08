@@ -1,4 +1,5 @@
 #pragma once
+
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -46,6 +47,7 @@ public:
         CommandResolverMap mp{
             {"r2d2:forward", [this, &server](int sock, BufferView buffer, Command command)
              {
+                 this->logger->debug(command.toString());
                  forward(std::stoi(command.args[0]));
                  server.sendTo(sock, "forward" + command.args[0]);
              }},
