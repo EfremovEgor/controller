@@ -14,6 +14,7 @@ set(project_sources
     ${PROJECT_SOURCE_DIR}/src/logger/logger.cpp
     ${PROJECT_SOURCE_DIR}/src/server/server.cpp
     ${PROJECT_SOURCE_DIR}/src/arduino_connector/arduino_connector.cpp
+    ${PROJECT_SOURCE_DIR}/src/soundpad/sound_player.cpp
 )
 
 set(project_headers
@@ -21,6 +22,8 @@ set(project_headers
     ${PROJECT_SOURCE_DIR}/src/server/server.hpp
     ${PROJECT_SOURCE_DIR}/src/server/resolvers.hpp
     ${PROJECT_SOURCE_DIR}/src/arduino_connector/arduino_connector.hpp
+    ${PROJECT_SOURCE_DIR}/src/soundpad/miniaudio.h
+    ${PROJECT_SOURCE_DIR}/src/soundpad/sound_player.hpp
 )
 add_executable(
     ${PROJECT_NAME}

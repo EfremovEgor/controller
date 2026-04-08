@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <numeric>
 
 class Command
 {
@@ -8,10 +9,11 @@ public:
     std::string domain;
     std::string command;
     std::vector<std::string> args;
-    const std::string makeCommandBasis()
+    std::string makeCommandBasis() const
     {
         return this->domain + ":" + this->command;
     }
+
     Command(std::string rawCommand)
     {
         size_t posColon = rawCommand.find(':');
@@ -24,6 +26,7 @@ public:
         size_t startCmd = (posColon != std::string::npos) ? posColon + 1 : 0;
         size_t endCmd = (posPipe != std::string::npos) ? posPipe : rawCommand.length();
         this->command = rawCommand.substr(startCmd, endCmd - startCmd);
+        std::cout << this->command << std::endl;
 
         if (posPipe != std::string::npos)
         {
@@ -44,5 +47,11 @@ public:
             lastArg.erase(lastArg.find_last_not_of(" \t") + 1);
             this->args.push_back(lastArg);
         }
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Command &obj)
+    {
+        return os << "Command: " << obj.command << ", Domain: " << obj.domain << ", Basis: " << obj.makeCommandBasis()
+                  << ", Args: " << std::accumulate(obj.args.begin(), obj.args.end(), std::string(""));
+        ;
     }
 };
