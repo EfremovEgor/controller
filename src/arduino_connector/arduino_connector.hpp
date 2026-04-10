@@ -32,6 +32,10 @@ private:
 public:
     ~ArduinoConnector();
     ArduinoConnector();
+    void play(const std::string &file)
+    {
+        sound_player->play(file);
+    }
     ServerResolver getResolver(Server &server)
     {
         CommandResolverMap mp{
@@ -40,6 +44,11 @@ public:
                  forward(std::stoi(command.args[0]));
                  server.sendTo(sock, "forward" + command.args[0]);
              }},
+            {"r2d2:stop", [this, &server](int sock, BufferView buffer, Command command)
+             {
+                 stop();
+                 server.sendTo(sock, "stop");
+             }},
             {"r2d2:backward", [this, &server](int sock, BufferView buffer, Command command)
              {
                  backward(std::stoi(command.args[0]));
@@ -47,12 +56,12 @@ public:
              }},
             {"r2d2:left", [this, &server](int sock, BufferView buffer, Command command)
              {
-                 sendCommand(std::stoi(command.args[0]));
+                 left(std::stoi(command.args[0]));
                  server.sendTo(sock, "left" + command.args[0]);
              }},
             {"r2d2:right", [this, &server](int sock, BufferView buffer, Command command)
              {
-                 sendCommand(std::stoi(command.args[0]));
+                 right(std::stoi(command.args[0]));
                  server.sendTo(sock, "right" + command.args[0]);
              }},
             {"r2d2:chaos", [this, &server](int sock, BufferView buffer, Command command)

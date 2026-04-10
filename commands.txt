@@ -13,4 +13,3 @@ r2d2:error              0xFF
 r2d2:status_idle        0xE0
 r2d2:status_obstacle    0xE1
 r2d2:status_moving      0xE2
-

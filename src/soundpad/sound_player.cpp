@@ -44,12 +44,8 @@ bool SoundPlayer::play(const std::string &filepath, bool loop)
         return false;
     }
 
-    if (ma_sound_is_playing(&current_sound_))
-    {
-        ma_sound_stop(&current_sound_);
-        ma_sound_uninit(&current_sound_);
-    }
-
+    ma_sound_stop(&current_sound_);
+    ma_sound_uninit(&current_sound_);
     std::memset(&current_sound_, 0, sizeof(ma_sound));
 
     ma_uint32 flags = loop ? MA_SOUND_FLAG_LOOPING : 0;
@@ -76,13 +72,10 @@ void SoundPlayer::stop()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (ma_sound_is_playing(&current_sound_))
-    {
-        ma_sound_stop(&current_sound_);
-        ma_sound_uninit(&current_sound_);
-        std::memset(&current_sound_, 0, sizeof(ma_sound));
-        syslog(LOG_DEBUG, "SoundPlayer: остановлен");
-    }
+    ma_sound_stop(&current_sound_);
+    ma_sound_uninit(&current_sound_);
+    std::memset(&current_sound_, 0, sizeof(ma_sound));
+    syslog(LOG_DEBUG, "SoundPlayer: остановлен");
 }
 
 void SoundPlayer::set_volume(float volume)

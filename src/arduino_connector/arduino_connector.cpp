@@ -176,12 +176,14 @@ void ArduinoConnector::onArduinoByteResponse(uint8_t byte)
 
 void ArduinoConnector::forward(const char &speed)
 {
+    sound_player->play("/home/nikita/MyProjects/R2D2/controller/src/soundpad/sounds/stop.mp3");
     char res = 0b00010000 | (speed & 0x0F);
     sendCommand(res);
 }
 
 void ArduinoConnector::backward(const char &speed)
 {
+    sound_player->play("/home/nikita/MyProjects/R2D2/controller/src/soundpad/sounds/stop.mp3");
     char res = 0b00100000 | (speed & 0x0F);
     sendCommand(res);
 }
